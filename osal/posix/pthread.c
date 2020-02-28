@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2015-2017 Alibaba Group Holding Limited
  */
 
@@ -154,6 +154,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
         if (ptcb->join_sem != NULL) {
             krhino_sem_dyn_del(ptcb->join_sem);
         }
+        krhino_mm_free(ptcb->tid);
         krhino_mm_free(ptcb);
         return -1;
     }
@@ -170,6 +171,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
         krhino_mm_free(stack);
     }
 
+    krhino_mm_free(ptcb->tid);
     krhino_mm_free(ptcb);
 
     return -1;
