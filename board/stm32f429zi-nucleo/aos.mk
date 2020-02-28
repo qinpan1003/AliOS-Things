@@ -58,7 +58,7 @@ GLOBAL_INCLUDES += .    \
                    aos/ \
                    Inc/
 
-GLOBAL_CFLAGS  += -DSTM32F429xx -DCENTRALIZE_MAPPING
+GLOBAL_CFLAGS  += -DSTM32F429xx -DCENTRALIZE_MAPPING -D_POSIX_C_SOURCE=0
 
 ifeq ($(COMPILER),armcc)
 GLOBAL_LDFLAGS += -L --scatter=board/stm32f429zi-nucleo/STM32F429ZITx.sct
