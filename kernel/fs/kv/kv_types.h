@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2015-2017 Alibaba Group Holding Limited
  */
 
@@ -181,10 +181,8 @@ typedef struct _block_info_t {
 typedef struct _kv_mgr_t {
     uint8_t       inited;
     uint8_t       gc_trigger;
-    uint8_t       gc_waiter;
     uint8_t       clean_blk_nums;
     kv_size_t     write_pos;
-    void         *gc_sem;
     void         *lock;
     block_info_t  block_info[KV_BLOCK_NUMS];
 } kv_mgr_t;

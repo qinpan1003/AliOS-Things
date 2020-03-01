@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2015-2017 Alibaba Group Holding Limited
  */
 
@@ -60,7 +60,6 @@ static void kv_trigger_gc(void)
         return;
     }
 
-    g_kv_mgr.gc_waiter  = 0;
     g_kv_mgr.gc_trigger = 1;
     kv_start_task("kv_gc", kv_gc_task, NULL, KV_TASK_STACK_SIZE);
 }
@@ -705,10 +704,6 @@ static void kv_gc_task(void *arg)
 exit:
     g_kv_mgr.gc_trigger = 0;
     kv_unlock(g_kv_mgr.lock);
-    if (g_kv_mgr.gc_waiter > 0) {
-        kv_sem_post_all(g_kv_mgr.gc_sem);
-    }
-
     kv_delete_task();
 }
 
@@ -825,11 +820,6 @@ int32_t kv_init(void)
         return KV_ERR_OS_LOCK;
     }
 
-    g_kv_mgr.gc_sem = kv_sem_create();
-    if (g_kv_mgr.gc_sem == NULL) {
-        return KV_ERR_OS_SEM;
-    }
-
     if ((res = kv_init_internal()) != KV_OK) {
         return res;
     }
@@ -851,8 +841,6 @@ void kv_deinit(void)
 {
     g_kv_mgr.inited = 0;
 
-    kv_sem_free(g_kv_mgr.gc_sem);
-
     kv_lock_free(g_kv_mgr.lock);
 }
 
@@ -869,11 +857,6 @@ int32_t kv_item_set(const char *key, const void *val, int32_t len)
     if (!key || !val || (len <= 0) || (strlen(key) > KV_MAX_KEY_LEN) || \
         (len > KV_MAX_VAL_LEN)) {
         return KV_ERR_INVALID_PARAM;
-    }
-
-    if (g_kv_mgr.gc_trigger != 0) {
-        g_kv_mgr.gc_waiter++;
-        kv_sem_wait(g_kv_mgr.gc_sem);
     }
 
     if ((res = kv_lock(g_kv_mgr.lock)) != KV_OK) {
@@ -983,11 +966,6 @@ int32_t kv_item_secure_set(const char *key, const void *val, int32_t len)
     if (!key || !val || (len <= 0) || (strlen(key) > KV_MAX_KEY_LEN) || \
         (len > KV_MAX_VAL_LEN)) {
         return KV_ERR_INVALID_PARAM;
-    }
-
-    if (g_kv_mgr.gc_trigger != 0) {
-        g_kv_mgr.gc_waiter++;
-        kv_sem_wait(g_kv_mgr.gc_sem);
     }
 
     if ((res = kv_lock(g_kv_mgr.lock)) != KV_OK) {
